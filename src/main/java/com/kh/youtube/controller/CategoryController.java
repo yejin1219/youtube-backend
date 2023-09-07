@@ -35,7 +35,7 @@ public class CategoryController {
       }
 
     @PostMapping("/category")
-    public ResponseEntity<Category>create(@PathVariable Category category){
+    public ResponseEntity<Category>create(@RequestBody Category category){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(service.create(category));
         }catch (Exception e){
@@ -44,7 +44,7 @@ public class CategoryController {
     }
 
     @PutMapping("/category")
-    public ResponseEntity<Category>update(@PathVariable Category category){
+    public ResponseEntity<Category>update(@RequestBody Category category){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(service.update(category));
         }catch (Exception e){
