@@ -17,7 +17,7 @@ public class Category {
     @SequenceGenerator(name="categorySequence", sequenceName = "SEQ_CATEGORY", allocationSize = 1)
     private int categoryCode;
 
-    @Column(name="category_name")
+    @Column(name="category_name") //테이블명과 변수 이름이 다른 경우 명시해줘야 함
     private String categoryName;
 
 }
