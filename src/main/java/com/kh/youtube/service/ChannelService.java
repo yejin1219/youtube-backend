@@ -32,9 +32,7 @@ public class ChannelService {
     }
 
     public Channel create(Channel channel){
-        Member member = memberDAO.findById(channel.getMember().getId()).orElse(null);
-        log.info("channel Create : " + member);
-        channel.setMember(member);
+
         return dao.save(channel);
     }
 
