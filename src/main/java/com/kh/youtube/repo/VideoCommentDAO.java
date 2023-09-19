@@ -9,6 +9,6 @@ import java.util.List;
 public interface VideoCommentDAO extends JpaRepository<VideoComment, Integer> {
 
     // 영상 1개에 따른 댓글 전체 조회
-    @Query(value = "SELECT * FROM VIDEO_COMMENT WHERE VIDEO_CODE = :CODE", nativeQuery = true)
+    @Query(value = "SELECT * FROM VIDEO_COMMENT WHERE VIDEO_CODE = :code", nativeQuery = true)
     List<VideoComment> findByVideoCode(int code);
 }

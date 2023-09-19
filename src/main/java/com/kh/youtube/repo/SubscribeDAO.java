@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface SubscribeDAO extends JpaRepository<Subscribe, Integer> {
     // 내가 구독한 채널 조회 SELECT * FROM WHERE ID=?
-    @Query(value = "SELECT * FROM WHERE ID= :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM WHERE ID= :userId", nativeQuery = true)
     List<Subscribe> finbyMemberId(String userId);
 }

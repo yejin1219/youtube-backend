@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/*")
+@CrossOrigin(origins={"*"}, maxAge = 6000) // 리액트와 스트링부트 서로 포트번호 다르기 때문에 이걸 설정하면 허용해줌
 public class CategoryController {
 
     @Autowired
