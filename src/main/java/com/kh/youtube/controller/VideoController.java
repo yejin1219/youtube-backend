@@ -9,6 +9,10 @@ import com.kh.youtube.service.VideoService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,15 +49,32 @@ public class VideoController {
 
 
     // 영상 전체 조회 Get - http://localhost:8080/api/video
-    @GetMapping("/video")
-    public ResponseEntity<List<Video>> showAllVideo() {
-        return ResponseEntity.status(HttpStatus.OK).body(videoservice.showAll());
+    @GetMapping("/video")                      // defaultValue1로 해야 page-1 = 0, 디폴트값 지정해줘야 포스트맨에서 파라미터 값 안넘겨도(http://localhost:8080/api/video?page=2)이렇게 안넘겨도 영상 전체 조회 할 수 있도록 
+    public ResponseEntity<List<Video>> showAllVideo(@RequestParam(name="page", defaultValue = "1") int page) {
+
+        // 정렬
+        Sort sort = Sort.by("videoCode").descending();
+
+        // 한 페이지의 10개 동영상 보여지도록..      // 페이지넘버가 바껴야 하기 때문에 파라미터 값으로 받아와야 함
+        Pageable pageable = PageRequest.of(page-1,10, sort); //페이지는 0부터 시작 ,10개
+        Page<Video> result= videoservice.showAll(pageable);
+
+        // result안에는 많은 정보들이 담겨져 있다.
+        log.info("Total Pages : " +  result.getTotalPages());// 총 몇 페이지
+        log.info("Total Count : " + result.getTotalElements()); // 전체 갯수
+        log.info("Page Number : " + result.getNumber()); // 현재 페이지 번호
+        log.info("Page Size:" + result.getSize());// 페이지당 데이터 개수
+        log.info("Next Page : " + result.hasNext()); // 다음 페이지가 있는지 존재 여부
+        log.info("First Page : " + result.isFirst()); // 시작 페이지 여부
+
+        //return ResponseEntity.status(HttpStatus.OK).build();
+       return ResponseEntity.status(HttpStatus.OK).body(result.getContent()); //  videoservice.showAll() 이걸로 보내면 반환값이 List가 아닌 Page이기 때문에 사용불가
     }
 
     // 영상 추가 POST - http://localhost:8080/api/video
     @PostMapping("/video")
-    public ResponseEntity<Video> createVideo(MultipartFile video, MultipartFile image, String title, String desc, String categoryCode) {
-        log.info("video : " + video);
+    public ResponseEntity<Video> createVideo(MultipartFile video, MultipartFile image, String title,@RequestParam(name="desc", required = false) String desc, String categoryCode) {
+        log.info("video : " + video);                                            // 필수값이 아닌 것들은 required = false 로 지정해줘서  값을 안넣어도 상관이없도록
         log.info("image" + image);
         log.info("title" + title);
         log.info("desc" + desc);
@@ -89,8 +110,8 @@ public class VideoController {
 
 
         Video vo = new Video();
-        vo.setVideoUrl(saveVideo);
-        vo.setVideoPhoto(saveImg);
+        vo.setVideoUrl( uuid + "_" + realVideo);
+        vo.setVideoPhoto(uuid + "_"+ realImg);
         vo.setVideoTitle(title);
         vo.setVideoDesc(desc);
 
@@ -99,7 +120,7 @@ public class VideoController {
         vo.setCategory(category);
 
         Channel channel = new Channel();
-        channel.setChannelCode(21);
+        channel.setChannelCode(31);
         vo.setChannel(channel);
 
         Member member = new Member();
