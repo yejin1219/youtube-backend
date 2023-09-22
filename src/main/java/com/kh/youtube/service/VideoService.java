@@ -4,6 +4,7 @@ import com.kh.youtube.domain.Member;
 import com.kh.youtube.domain.Video;
 import com.kh.youtube.repo.MemberDAO;
 import com.kh.youtube.repo.VideoDAO;
+import com.querydsl.core.BooleanBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,10 +20,10 @@ public class VideoService {
     @Autowired
     private VideoDAO dao;
 
-    public Page<Video> showAll(Pageable pageable){
+    public Page<Video> showAll(Pageable pageable, BooleanBuilder builder){// 동적쿼리 만드는 핵심 BooleanBuilder builder
         // dao.findAll() -> List<Video>
         //dao.findAll(pageable) -> Page<Video> 로 반환
-        return dao.findAll(pageable);
+        return dao.findAll(builder, pageable ); // 순서 builder 먼저 넣어야 함
     }
 
     public Video show(int videoCode){

@@ -29,7 +29,7 @@ import java.util.UUID;
 @RequestMapping("/api/*")
 public class ChannelController {
 
-    @Value("${spring.servlet.multipart.location}")
+    @Value("${youtube.upload.path}")
     private String uploadPath;
 
     @Autowired

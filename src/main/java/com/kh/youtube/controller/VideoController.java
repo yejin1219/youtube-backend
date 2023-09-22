@@ -6,6 +6,8 @@ import com.kh.youtube.service.VideoCommentService;
 import com.kh.youtube.service.VideoLikeService;
 import com.kh.youtube.service.VideoService;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.StyledEditorKit;
 import javax.xml.stream.events.Comment;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +35,7 @@ import java.util.UUID;
 @CrossOrigin(origins = {"*"}, maxAge = 6000)
 public class VideoController {
 
-    @Value("${spring.servlet.multipart.location}") //application.properties에 있는 변수
+    @Value("${youtube.upload.path}") //application.properties에 있는 변수
     private String uploadPath;
 
     @Autowired
@@ -50,14 +53,34 @@ public class VideoController {
 
     // 영상 전체 조회 Get - http://localhost:8080/api/video
     @GetMapping("/video")                      // defaultValue1로 해야 page-1 = 0, 디폴트값 지정해줘야 포스트맨에서 파라미터 값 안넘겨도(http://localhost:8080/api/video?page=2)이렇게 안넘겨도 영상 전체 조회 할 수 있도록 
-    public ResponseEntity<List<Video>> showAllVideo(@RequestParam(name="page", defaultValue = "1") int page) {
-
+    public ResponseEntity<List<Video>> showAllVideo(@RequestParam(name="page", defaultValue = "1") int page, @RequestParam(name="category", required = false) Integer category) {
+                                                                                                                                                             // int가 아닌 Integer 로 지정하면 null 값도 받을 수 잇음
         // 정렬
         Sort sort = Sort.by("videoCode").descending();
 
         // 한 페이지의 10개 동영상 보여지도록..      // 페이지넘버가 바껴야 하기 때문에 파라미터 값으로 받아와야 함
-        Pageable pageable = PageRequest.of(page-1,10, sort); //페이지는 0부터 시작 ,10개
-        Page<Video> result= videoservice.showAll(pageable);
+        Pageable pageable = PageRequest.of(page-1,20, sort); //페이지는 0부터 시작 ,10개
+
+
+        // 동적 쿼리를 위한 QuerDSL을 사용한 코드들 추가
+        //1. Q도메인 클래스(build gradle를 통해 만들어진 거)를 가져와야 한다.
+
+        QVideo qvideo = QVideo.video;
+
+        //2. BooleanBuilder는 where문에 들어가는 조건들을 넣어주는 컨테이너
+        BooleanBuilder builder = new BooleanBuilder();
+
+
+        if(category!=null){
+            log.info("category =======> " + category);
+            //3. 원하는 조건은 필드값과 같이 결합해서 생성한다.
+            BooleanExpression expression = qvideo.category.categoryCode.eq(category);
+
+            //4. 만들어진 조건은 where문에 and나 or 같은 키워드와 결합한다.
+            builder.and(expression);
+        }
+
+        Page<Video> result= videoservice.showAll(pageable, builder);
 
         // result안에는 많은 정보들이 담겨져 있다.
         log.info("Total Pages : " +  result.getTotalPages());// 총 몇 페이지
